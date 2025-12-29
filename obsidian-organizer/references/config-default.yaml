@@ -1,0 +1,157 @@
+version: 1
+
+vault:
+  root: ""
+
+folders:
+  inbox: "00_Inbox"
+  daily: "01_Daily"
+  literature: "10_Literature"
+  permanent: "20_Permanent"
+  maps: "30_Maps"
+  projects: "40_Projects"
+  archive: "90_Archive"
+  plugconfig: "99_Plugconfig"
+
+assets:
+  enabled: true
+  subfolder: "_assets"
+  strategy: "per_top_folder"
+  split_by_kind: false
+
+types:
+  mapping:
+    inbox: "${folders.inbox}"
+    daily: "${folders.daily}"
+    literature: "${folders.literature}"
+    permanent: "${folders.permanent}"
+    map: "${folders.maps}"
+    project: "${folders.projects}"
+    archive: "${folders.archive}"
+
+status:
+  enabled: true
+  allowed: ["seed", "draft", "evergreen", "archived"]
+  default_by_type:
+    inbox: "seed"
+    daily: "seed"
+    literature: "draft"
+    permanent: "draft"
+    map: "evergreen"
+    project: "draft"
+    archive: "archived"
+
+naming:
+  note_filename:
+    pattern: "YYYYMMDD_{title}"
+    separator: " "
+    extension: ".md"
+
+    normalize_title:
+      trim: true
+      collapse_spaces: true
+      replace_invalid_chars: true
+      invalid_chars_regex: '[\\/\\:\\\\*\\?"<>\\|]'
+      invalid_chars_replacement: "-"
+      replace_halfwidth_colon: true
+
+    conflict:
+      strategy: "increment_suffix"
+      format: "{base} ({n})"
+
+frontmatter:
+  enabled: true
+  mode: "merge"
+  preserve_unknown: true
+  date_format: "YYYY-MM-DD"
+  keys_order: [type, status, created, updated, tags, aliases, source]
+
+  defaults:
+    type: "inbox"
+    status: "seed"
+    tags: []
+    aliases: []
+    source: ""
+
+  created:
+    set_if_missing: true
+    source: "today"
+
+  updated:
+    set_on_change: true
+    source: "today"
+
+inbox_rules:
+  conservative: true
+  allowed_actions_when_uncertain:
+    - "frontmatter_fill"
+    - "filename_normalize"
+    - "link_fix"
+    - "report_only"
+
+  classification:
+    enabled: true
+    rules:
+      - name: "is_literature_by_source"
+        detect:
+          frontmatter_has_any: ["source", "url", "doi", "isbn"]
+          or_body_contains_any: ["http://", "https://", "DOI:", "ISBN"]
+        set:
+          type: "literature"
+
+      - name: "is_project_by_frontmatter"
+        detect:
+          frontmatter_has_any: ["project"]
+        set:
+          type: "project"
+
+links:
+  fix_wikilinks_on_rename_move: true
+  fix_markdown_links_on_rename_move: true
+
+filetypes:
+  excalidraw:
+    include: ["*.excalidraw.md"]
+    allow_frontmatter: true
+    allow_rename: true
+    allow_move: true
+    default_risk: "normal"
+
+  canvas:
+    include: ["*.canvas"]
+    allow_rename: true
+    allow_move: true
+    allow_rewrite: false
+    report_refs: true
+
+  base:
+    include: ["*.base"]
+    allow_rename: true
+    allow_move: true
+    allow_rewrite: false
+    report_refs: "best_effort"
+
+maps:
+  enabled: true
+  folder: "${folders.maps}"
+  files:
+    index: "00_Index.md"
+    permanent_index: "Permanent_Index.md"
+    projects_index: "Projects_Index.md"
+  policy:
+    update_recently_updated: true
+    recently_updated_days: 14
+    list_orphans: true
+    orphan_policy: "report_only"
+
+safety:
+  dry_run_default: true
+  max_files_per_run: 50
+
+  backup:
+    enabled: true
+    dir: "${folders.archive}/_organizer_backups"
+
+  git_checkpoint:
+    enabled: true
+    message: "checkpoint: before obsidian organize"
