@@ -341,7 +341,7 @@ move:
 
 Mapping examples:
 
-- FRONTMATTER-_ / TYPE-_ / STATUS-\* / SOURCE-MISSING => frontmatter op
+- FRONTMATTER-_/ TYPE-_ / STATUS-\* / SOURCE-MISSING => frontmatter op
 - FILENAME-NONCONFORM / RENAME-CONFLICT => rename op
 - WRONG-FOLDER-BY-TYPE / MOVE-CROSS-TOP => move op (cross-top => HIGH)
 - BROKEN-\* => preferably handled via fixLinks inside rename/move; otherwise separate linkFix (optional)
